@@ -47,6 +47,7 @@ class FeatureExtractor:
 
 
         words = text.split(" ")
+        #words = kTOKENIZER.tokenize(text)
 
         d["line_length"] = len(words)
         d["num_char"] = len("".join(words))
@@ -54,6 +55,8 @@ class FeatureExtractor:
         #d["starts_with+"+words[0].lower()] += 1
         #print "".join(words)
         d["vowel_count"] = len(re.sub('[^aeiou]', "", "".join(words)))
+        #d["punc_count"] = len(re.sub('[^\'!/\"#$%&\\\()*+,\-./:;<=>?@\^_`{|}~]', "", "".join(words)))
+        #d["punc_count"] = len(re.sub('[\w]', "", "".join(words)))
 
         l = []
 
@@ -86,7 +89,8 @@ class FeatureExtractor:
             # if ii[-1] in p:
             #     d[ii[-1]] += 1
 
-            ii = ii.strip(string.punctuation)
+            #ii = ii.strip(string.punctuation)
+            ii = re.sub('[^\w]', '', ii)
 
             d[morphy_stem(ii.lower())] += 1
 

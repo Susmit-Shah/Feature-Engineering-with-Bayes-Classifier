@@ -30,43 +30,72 @@ class FeatureExtractor:
 
         None
 
-    def features(self, text, cat=""):
+    def features(self, text):
         d = defaultdict(int)
         # d will contain term frequency for each word in document
-
-        text = text.strip()
 
         # for ii in kTOKENIZER.tokenize(text):
         #     d[morphy_stem(ii)] += 1
 
+        #text = text.strip()
+
+        # ################ Check if text ends with punctuation ##############################
 
         # if text.endswith(string.punctuation):
         #     d["end_punctuation"] = True
         # else:
         #     d["end_punctuation"] = False
 
-
         words = text.split(" ")
-        #words = kTOKENIZER.tokenize(text)
+        # words = kTOKENIZER.tokenize(text)
 
+        # Feature :: Last character of text
+        d["ending_"+text[-1]+""] += 1
+
+        # Feature :: Number of words in line
         d["line_length"] = len(words)
+
+        # Feature :: Number of characters in text
         d["num_char"] = len("".join(words))
+
+        # Feature :: Average length/size of words used in text
         d["average_word_len"] = d["num_char"]/len(words)
-        #d["starts_with+"+words[0].lower()] += 1
-        #print "".join(words)
+
+        # Feature :: Number of vowels present in text
         d["vowel_count"] = len(re.sub('[^aeiou]', "", "".join(words)))
-        #d["punc_count"] = len(re.sub('[^\'!/\"#$%&\\\()*+,\-./:;<=>?@\^_`{|}~]', "", "".join(words)))
-        #d["punc_count"] = len(re.sub('[\w]', "", "".join(words)))
 
-        l = []
+        # Feature :: Number of digits used in text
+        d["digit_count"] = len(re.findall(r'\d', text))
 
-        ## 2- grams ##
-        # words = [x for x in words if x]
-        # for i in range(0, len(words) - 1):
-        #     d[words[i] + " " + words[i + 1]] += 1
-        #     l.append((words[i] + " " + words[i + 1]))
+        # Feature :: Number of punctuation in text.
+        # d["punc_count"] = len(re.sub('[^\'!/\"#$%&\\\()*+,\-./:;<=>?@\^_`{|}~]', "", "".join(words)))
+        # d["punc_count"] = len(re.sub('[\w]', "", "".join(words)))
+
+
+        # ########################### N- GRAMS #############################################
+
+        ## 2 - grams ##
+        # t = re.sub('[^\w ]', "", text)
+        # words_1 = t.split(" ")
+        # words_1 = [x for x in words_1 if x]
+        # for i in range(0, len(words_1) - 1):
+        #     d[words_1[i] + " " + words_1[i + 1]] += 1
+        #     #l.append((words_1[i] + " " + words_1[i + 1] + " " + words_1[i + 2]))
+
+        # ## 3 - grams ##
+        t = text                     #re.sub('[^\w ]', "", text)
+        words_1 = t.split(" ")
+        words_1 = [x for x in words_1 if x]
+        for i in range(0, len(words_1) - 2):
+            d[words_1[i] + " " + words_1[i + 1] + " " + words_1[i+2]] += 1
+            # l.append((words_1[i] + " " + words_1[i + 1] + " " + words_1[i+2]))
         # print words
         # print l
+
+        # ## 4 - grams ##
+        # for i in range(0, len(words_1) - 3):
+        #     d[words_1[i] + " " + words_1[i + 1] + " " + words_1[i + 2] + " " + words_1[i + 3]] += 1
+
 
 
         p = list(string.punctuation)
@@ -74,33 +103,37 @@ class FeatureExtractor:
         for ii in words:
 
             ii = ii.strip()
-            # for pp in p :
-            #     if pp in ii:
-            #         print ii
 
-            # i = ii.strip(string.punctuation)
+            #i = ii.strip(string.punctuation+" ")
+
+            # Feature :: Check if entire word is in Upper case
             # if i.isupper(): # and len(i)>1:
             #     # print ii, " :: ", cat
-            #     d["all_upper"] += 1
+            #    d["all_upper"] += 1
 
-            # if ii[0] in p:
-            #     d[ii[0]] += 1
-            #     #print ii
-            # if ii[-1] in p:
-            #     d[ii[-1]] += 1
+            ii = re.sub('[^\w]', '', ii)            # Strips all characters except for a-zA-Z from ii
 
-            #ii = ii.strip(string.punctuation)
-            ii = re.sub('[^\w]', '', ii)
-
-            d[morphy_stem(ii.lower())] += 1
-
-            #d[ii.lower()] += 1
+            # Feature :: Term Frequency
+            if ii != '':
+                d[morphy_stem(ii.lower())] += 1
 
         text = text.strip(string.punctuation)
+
+        # Feature :: Check for number of comma separated text in poem line
+        # comma_split = text.split(',')
+        # d['comma_split'] = len(comma_split)
+
         w = text.split(" ")
         w = [x for x in w if x]  # Removes " " in list if present
-        d["ends_with+" + w[-1].lower()] += 1
-        d["starts_with+" + w[0].lower()] += 1
+        # Remove everything except word character
+        end = re.sub('[^\w]', '', w[-1])
+        start = re.sub('[^\w]', '', w[0])
+
+        # Feature :: Ending word of text
+        d["ends_with_word+" + end.lower()] += 1
+
+        # Feature :: Starting word of text
+        d["starts_with_word+" + start.lower()] += 1
 
         return d
 
@@ -151,11 +184,14 @@ if __name__ == "__main__":
     dev_test = []
     full_train = []
 
+    #fh13 = open("lines.txt","w")
+
     for ii in train:
         if args.subsample < 1.0 and int(ii['id']) % 100 > 100 * args.subsample:
             continue
 
-        feat = fe.features(ii['text'], ii['cat'])
+        #fh13.write(ii['text'] + '###' + ii['cat'] +'\n')
+        feat = fe.features(ii['text'])
         if int(ii['id']) % 5 == 0:
             dev_test.append((feat, ii['cat']))
         else:
@@ -167,12 +203,18 @@ if __name__ == "__main__":
     sys.stderr.write("Training classifier ...\n")
     classifier = nltk.classify.NaiveBayesClassifier.train(dev_train)
 
+    errors = []
     right = 0
     total = len(dev_test)
     for ii in dev_test:
         prediction = classifier.classify(ii[0])
         if prediction == ii[1]:
             right += 1
+        # else:
+        #     errors.append((ii[0], ii[1], prediction))
+        # for i in errors:
+        #     print i
+        #     print("\n")
     sys.stderr.write("Accuracy on dev: %f\n" % (float(right) / float(total)))
 
     if testfile is None:

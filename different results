@@ -1,0 +1,14 @@
+bug + plain morph stem  = 98
+without bug + plain morph stem = 94
+
+bug + if morphstem = 92.67
+without bug + if morph stem = 90
+
+bug + ending = 1
+without bug + ending = 94.66
+
+
+bug + ending + if morph = 1
+Without bug + ending + if morph = 93.33
+
+Without bug = 94.66

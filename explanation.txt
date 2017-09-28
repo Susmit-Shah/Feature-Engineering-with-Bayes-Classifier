@@ -1,0 +1,142 @@
+
+
+1) Use of alternate Tokenizer:
+The assignment initially used TreebankWordTokenizer() for tokenizing text and then used word count which gave accuracy of around 77%. But I found that if created my own tokenizer and remove and all punctuations from it and then use term frequency of words as a feature then accuracy rose to around 82%. 
+
+
+
+2) Number of characters without any whitespaces:
+From seeing the corpus, I found that Emily's poem consisted longer sentences than Shakespeare and decided to implement this. This turned out to be one of the most important features which rose accuracy to 90.5%. Including number of characters without any whitespaces showed that Emily consistently used longer sentences than Shakespeare. This can be seen by printing most prominent features of Bayes Classifier
+
+num_char = 24                  b : s      =     56.3 : 1.0
+num_char = 23                  b : s      =     42.0 : 1.0
+num_char = 25                  b : s      =     23.3 : 1.0
+num_char = 26                  b : s      =     21.1 : 1.0
+
+But if I include whitespaces in counting number of characters, then accuracy went down to 89%. Hence, not including whitespaces turned out to be an advantageous feature.
+
+
+
+3) Number of words per line: 
+This feature gave number of words used by poet per line. Using this feature, it can be inferred that Emily had poem lines consisting of 11 words 6 times more than Shakespeare. This feature rose the accuracy slightly by around 0.5%. 
+
+line_length = 11                  b : s      =      6.0 : 1.0
+line_length = 5                   b : s      =      4.4 : 1.0
+line_length = 10                  s : b      =      2.4 : 1.0
+line_length = 9                   s : b      =      2.0 : 1.0
+
+
+
+4) Average size of word per line per poet:
+This feature calculated average size of words used by two poets. This feature showed that Emily preferred using more shorter words of size 2 or 3 like "be", "so" while Shakespeare used longer words in his sentence.
+
+average_word_len = 2                   b : s      =     50.6 : 1.0
+average_word_len = 3                   b : s      =      2.2 : 1.0
+average_word_len = 6                   s : b      =      4.9 : 1.0
+average_word_len = 5                   s : b      =      4.6 : 1.0
+
+
+
+5) Number of vowels per line:
+Vowel count was another prominent feature which rose accuracy to 92%. Speciffically, amongst 2 poets Emily used less vowels in her poem lines as compared to Shakespeare. This can be seen from training statistics below. 
+
+vowel_count = 6                   b : s      =     55.7 : 1.0
+vowel_count = 7                   b : s      =     27.9 : 1.0
+vowel_count = 8                   b : s      =      9.5 : 1.0
+vowel_count = 17                  s : b      =     10.1 : 1.0
+
+
+
+6) Term frequency of word
+This was that basic feature for Classifier. Using various combinations of trial and error, I found that accuracy can be augmented by removing all the punctuations from the word and then counting its term frequency. 
+
+
+
+7) Starting word of line
+This is one more prominent feature. After analyzing data using 'sed' commands, it was found that Emily and Shakespeare always started their poem lines with specific words. Hence, I implemented this feature and from statistics we can see that indeed Emily had more poems starting with "Their", "Thou", "There" while Shakespeare used "Than", "Thou" etc. 
+
+starts_with_word+their = 1                   b : s      =      7.9 : 1.0
+starts_with_word+than = 1                    s : b      =      6.8 : 1.0
+starts_with_word+through = 1                 b : s      =      6.5 : 1.0
+starts_with_word+thou = 1                    s : b      =      6.4 : 1.0
+starts_with_word+there = 1                   b : s      =      5.8 : 1.0
+starts_with_word+if = 1                      s : b      =      5.7 : 1.0
+
+
+
+
+8) Ending word of line 
+Same was true for ending words also. Both features of starting word and ending word increased frequency to around 95%.
+
+ends_with_word+sky = 1                       b : s      =      7.2 : 1.0
+ends_with_word+thee = 1                      s : b      =      6.8 : 1.0
+ends_with_word+there = 1                     b : s      =      5.8 : 1.0
+
+
+
+9) N-grams approach i.e. 2-grams, 3-grams, 4-grams :
+I implemented 2-grams, 3-grams and 4-grams and found that use of 2-grams decreased the accuracy of classifier and hence didn't included it in final features. On other hand, used of 3-grams increased accuracy by around 1% and use of 4-grams didn't affect the accuracy.
+
+
+
+10) Ending Character of line/Ends with punctuation:
+Shakespeare had more lines ending with punctuation than Emily and hence this feature was included.
+
+
+
+11) Number of comma separated sentences in line
+This feature counted number of commas used by poets in their single poem line. I found that Emily used more commas in her sentence than Shakespeare did as seen below. 
+
+comma_split = 5                   b : s      =      1.8 : 1.0
+comma_split = 3                   b : s      =      1.4 : 1.0
+comma_split = 2                   b : s      =      1.4 : 1.0
+comma_split = 1                   s : b      =      1.2 : 1.0
+comma_split = 4                   b : s      =      1.2 : 1.0
+
+
+
+11) Number of digits
+With use of some regular expression on corpus, I found that Emily had used digits in some of her poems lines while Shakespeare doesn't had any poem lines with digits
+
+
+
+12) Entire word in capital
+Emily has many poem lines with words which are entirely capital like 'DESIRE', 'MY' etc. while Shakespeare didn't used anything like that. Hence this was one more distinguishing feature.
+
+
+
+13) Number of punctuation
+This feature counted number of punctuations used by poets in each of their lines.
+
+
+
+
+
+15) TF-IDF
+I implemented TF-IDF to separate out least relevant word and to assign more weight to more distinguishing words in document but it turned out to be very inefficient and reduced accuracy to 67%.
+
+
+
+16) TF-IDF with log scale
+I tried using logarithmic formula of TF-IDF but it didn’t affect accuracy that much.
+
+
+17) TF-IDF without punctuations and some data pre-processing
+I tried using TF-IDF again by preprocessing the text lines like removing whitespaces and punctuation. This increased accuracy to around 79%, which was not helpful
+
+
+
+
+18) Number of Syllables
+Tried using Syllable count as one of the features. Didn't make any much difference.
+
+
+
+19) Stop words
+I created my own list of stop words to remove non-important words. Didn't make much difference in accuracy.
+
+
+
+20) Basic sentimental analysis
+I tried using basic sentimental analysis to see whether poem line have positive, negative or neutral tone. It was an interesting feature and showed some improvements in results after removing some other features. Tried different permutations and combinations of features and decided not to include it in final list of features.
+
